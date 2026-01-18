@@ -3,43 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Admin Dashboard' }} - VOGUE</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
     </style>
-    
     @stack('styles')
 </head>
 <body class="bg-gray-50" x-data="{ sidebarOpen: false }">
     
-    <!-- Sidebar -->
-    <aside 
-        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-        class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transition-transform duration-300 ease-in-out lg:translate-x-0"
-    >
+    <!-- Sidebar (Desktop) -->
+    <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform lg:translate-x-0 transition-transform duration-300 ease-in-out"
+           :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+        
         <!-- Logo -->
-        <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-sm">V</span>
-                </div>
-                <span class="text-xl font-bold text-gray-900">VOGUE</span>
-            </div>
-            <button @click="sidebarOpen = false" class="lg:hidden text-gray-500 hover:text-gray-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
+        <div class="flex items-center justify-center h-16 px-6 border-b border-gray-200">
+            <h1 class="text-2xl font-bold text-gray-900">VOGUE</h1>
         </div>
 
         <!-- Navigation -->
@@ -56,34 +41,24 @@
             </a>
 
             <!-- Products -->
-            <div x-data="{ open: {{ request()->routeIs('admin.product.*') ? 'true' : 'false' }} }">
-                <button @click="open = !open" 
-                        class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg transition-colors
-                        {{ request()->routeIs('admin.product.*') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <div class="flex items-center space-x-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                        <span>Products</span>
-                    </div>
-                    <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
-                </button>
-                <div x-show="open" x-collapse class="ml-8 mt-1 space-y-1">
-                    <a href="{{ route('admin.product.index') }}" 
-                       class="block px-3 py-2 text-sm rounded-lg {{ request()->routeIs('admin.product.index') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
-                        All Products
-                    </a>
-                    <a href="{{ route('admin.product.create') }}" 
-                       class="block px-3 py-2 text-sm rounded-lg {{ request()->routeIs('admin.product.create') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
-                        Add Product
-                    </a>
-                    <a href="{{ route('admin.category.index') }}" class="block px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">
-                        Category
-                    </a>
-                </div>
-            </div>
+            <a href="{{ route('admin.product.index') }}" 
+               class="flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors
+               {{ request()->routeIs('admin.product.*') ? 'text-white bg-blue-600' : 'text-gray-700 hover:bg-gray-100' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+                <span>Products</span>
+            </a>
+
+            <!-- Categories -->
+            <a href="{{ route('admin.category.index') }}" 
+               class="flex items-center space-x-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors
+               {{ request()->routeIs('admin.category.*') ? 'text-white bg-blue-600' : 'text-gray-700 hover:bg-gray-100' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                <span>Categories</span>
+            </a>
 
             <!-- Orders -->
             <a href="{{ route('admin.order.index') }}" 
@@ -154,17 +129,27 @@
                         </svg>
                     </button>
                     
-                    @if(isset($header))
-                        <div>
-                            {{ $header }}
-                        </div>
-                    @endif
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">{{ $header ?? 'Dashboard' }}</h1>
+                    </div>
                 </div>
 
                 <!-- Right: Search, Notifications, Profile -->
                 <div class="flex items-center space-x-4">
                     
-                  
+                    <!-- Search -->
+                    <div class="hidden md:flex items-center">
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                placeholder="Search..." 
+                                class="w-64 pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                            <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
 
                     <!-- Notifications -->
                     <button class="relative text-gray-500 hover:text-gray-700">

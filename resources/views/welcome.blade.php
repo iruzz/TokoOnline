@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>VOGUE — Brutalist Fashion Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -33,8 +34,8 @@
         }
         
         @keyframes slideDown {
-            from { transform: translateY(-100%); }
-            to { transform: translateY(0); }
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
         
         @keyframes fadeInUp {
@@ -118,6 +119,41 @@
 </head>
 <body class="bg-white text-gray-900">
     
+    <!-- Success/Error Notifications -->
+    @if(session('success'))
+        <div class="fixed top-20 right-6 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slideDown">
+            <div class="flex items-center gap-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                {{ session('success') }}
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                const notification = document.querySelector('.animate-slideDown');
+                if (notification) notification.style.display = 'none';
+            }, 3000);
+        </script>
+    @endif
+
+    @if(session('error'))
+        <div class="fixed top-20 right-6 bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slideDown">
+            <div class="flex items-center gap-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                {{ session('error') }}
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                const notification = document.querySelector('.animate-slideDown');
+                if (notification) notification.style.display = 'none';
+            }, 3000);
+        </script>
+    @endif
+    
     <!-- Header -->
     <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
         <div class="flex items-center justify-between px-6 py-3 max-w-7xl mx-auto">
@@ -154,13 +190,18 @@
                         <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
                     </button>
 
-                    <!-- Cart -->
-                    <button class="text-gray-500 hover:text-gray-700 relative transition-colors">
+                    <!-- Cart with Dynamic Count -->
+                    <a href="{{ route('cart.index') }}" class="text-gray-500 hover:text-gray-700 relative transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
                         </svg>
-                        <span class="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">3</span>
-                    </button>
+                        @php
+                            $cartCount = auth()->user()->getCartItemCount();
+                        @endphp
+                        @if($cartCount > 0)
+                            <span class="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">{{ $cartCount }}</span>
+                        @endif
+                    </a>
 
                     <!-- Profile Dropdown -->
                     <div x-data="{ open: false }" class="relative">
@@ -203,10 +244,10 @@
                                 </div>
                             </a>
 
-                            <a href="#orders" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                            <a href="{{ route('orders.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     My Orders
                                 </div>
@@ -333,29 +374,157 @@
                 <a href="#" class="text-sm uppercase tracking-wider border-b-2 border-accent hover:text-accent transition-colors">View All →</a>
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <!-- Product 1 -->
-                @foreach ( $newArrivals as $newArrival )
-                    
-                <div class="product-card bg-secondary border-4 border-primary relative badge-corner" style="animation-delay: 0.1s;">
-                    <div class="absolute top-3 left-3 bg-accent text-secondary text-xs font-bold px-3 py-1 uppercase tracking-wider z-10">{{ $newArrival->badge }}</div>
-                    <div class="aspect-square bg-border overflow-hidden">
-                        <img src="data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23f5f5f0'/%3E%3Crect x='150' y='50' width='100' height='300' fill='%230a0a0a' opacity='0.8'/%3E%3Ctext x='200' y='380' font-size='14' fill='%230066ff' text-anchor='middle' font-family='monospace'%3EOVERSIZED TEE%3C/text%3E%3C/svg%3E" alt="Product" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
-                    </div>
-                    <div class="p-4">
-                        <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">{{ $newArrival->category->name }}</div>
-                        <h3 class="font-display text-lg uppercase tracking-tight mb-2">{{ $newArrival->name }}</h3>
-                        <div class="flex items-center justify-between">
-                            <span class="font-bold text-xl"> Rp {{ number_format($newArrival->price, 0, ',', '.') }}</span>
-                            <button class="bg-primary text-secondary border-2 border-primary px-4 py-2 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                    @endforeach
-
+        <!-- SECTION: New Arrivals - FIXED UI -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+    @foreach ($newArrivals as $newArrival)
+    <div class="product-card bg-secondary border-4 border-primary relative">
+        @if($newArrival->badge)
+            <div class="absolute top-3 left-3 bg-accent text-secondary text-xs font-bold px-3 py-1 uppercase tracking-wider z-10">
+                {{ $newArrival->badge }}
             </div>
+        @endif
+        
+        <!-- Product Image -->
+        <a href="{{ route('product.show', $newArrival->slug) }}">
+            <div class="aspect-square bg-border overflow-hidden">
+                @if($newArrival->productImages->first())
+                    <img src="{{ Storage::url($newArrival->productImages->first()->image_path) }}" 
+                         alt="{{ $newArrival->name }}" 
+                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                @else
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                @endif
+            </div>
+        </a>
+        
+        <!-- Product Info - FIXED STRUCTURE -->
+        <div class="p-4 flex flex-col">
+            <!-- Category -->
+            <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">
+                {{ $newArrival->category->name }}
+            </div>
+            
+            <!-- Product Name - Fixed Height -->
+            <a href="{{ route('product.show', $newArrival->slug) }}">
+                <h3 class="font-display text-lg uppercase tracking-tight mb-2 hover:text-accent transition-colors line-clamp-2 h-14">
+                    {{ $newArrival->name }}
+                </h3>
+            </a>
+            
+            <!-- Price -->
+            <div class="font-bold text-xl text-blue-600 mb-3">
+                Rp {{ number_format($newArrival->final_price, 0, ',', '.') }}
+            </div>
+            
+            <!-- Buttons Grid - Always at same position with mt-auto -->
+            <div class="grid grid-cols-2 gap-2 mt-auto">
+                <!-- View Button -->
+                <a href="{{ route('product.show', $newArrival->slug) }}" 
+                   class="bg-white text-primary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-gray-100 transition-all text-center font-semibold">
+                    View
+                </a>
+                
+                <!-- Add to Cart Button -->
+                @auth
+                    <form action="{{ route('cart.add') }}" method="POST" class="w-full">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $newArrival->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" 
+                                class="w-full bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all font-semibold">
+                            Add
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" 
+                       class="bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all text-center inline-block font-semibold">
+                        Login
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+
+
+-->
+</div>
+
+<!-- SECTION: Trending Products - FIXED UI -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+    @foreach ($trendings as $trending)
+    <div class="product-card bg-secondary border-4 border-primary relative">
+        @if($trending->badge)
+            <div class="absolute top-3 left-3 bg-accent text-secondary text-xs font-bold px-3 py-1 uppercase tracking-wider z-10">
+                {{ $trending->badge }}
+            </div>
+        @endif
+        
+        <!-- Product Image -->
+        <a href="{{ route('product.show', $trending->slug) }}">
+            <div class="aspect-square bg-border overflow-hidden">
+                @if($trending->productImages->first())
+                    <img src="{{ Storage::url($trending->productImages->first()->image_path) }}" 
+                         alt="{{ $trending->name }}" 
+                         class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                @else
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                @endif
+            </div>
+        </a>
+        
+        <!-- Product Info - FIXED STRUCTURE -->
+        <div class="p-4 flex flex-col">
+            <!-- Category (only show if has badge) -->
+            @if($trending->badge)
+                <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">
+                    {{ $trending->category->name }}
+                </div>
+            @endif
+            
+            <!-- Product Name - Fixed Height -->
+            <a href="{{ route('product.show', $trending->slug) }}">
+                <h3 class="font-display text-lg uppercase tracking-tight mb-2 hover:text-accent transition-colors line-clamp-2 h-14">
+                    {{ $trending->name }}
+                </h3>
+            </a>
+            
+            <!-- Price -->
+            <div class="font-bold text-xl text-blue-600 mb-3">
+                Rp {{ number_format($trending->final_price, 0, ',', '.') }}
+            </div>
+            
+            <!-- Buttons Grid - Always at same position with mt-auto -->
+            <div class="grid grid-cols-2 gap-2 mt-auto">
+                <!-- View Button -->
+                <a href="{{ route('product.show', $trending->slug) }}" 
+                   class="bg-white text-primary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-gray-100 transition-all text-center font-semibold">
+                    View
+                </a>
+                
+                <!-- Add to Cart Button -->
+                @auth
+                    <form action="{{ route('cart.add') }}" method="POST" class="w-full">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $trending->id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" 
+                                class="w-full bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all font-semibold">
+                            Add
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" 
+                       class="bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all text-center inline-block font-semibold">
+                        Login
+                    </a>
+                @endauth
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
         </div>
     </section>
 
@@ -368,12 +537,8 @@
             </div>
             
             <div class="grid md:grid-cols-3 gap-8">
-                <!-- Collection 1 -->
-                 @foreach ( $featureds as $featured)
+                @foreach ($featureds as $featured)
                 <div class="hover-lift bg-secondary border-4 border-primary relative overflow-hidden">
-                   
-                        
-                    
                     <div class="h-96 bg-border overflow-hidden">
                         <img src=" " alt="Collection" class="w-full h-full object-cover hover:scale-110 transition-transform duration-700">
                     </div>
@@ -385,13 +550,8 @@
                             Shop {{ $featured->name }}
                         </button>
                     </div>
-                 
                 </div>
-                   @endforeach
-
-
-                <!-- Collection 3 -->
- 
+                @endforeach
             </div>
         </div>
     </section>
@@ -403,24 +563,19 @@
                 <h2 class="font-display text-5xl uppercase tracking-tighter">Shop by Category</h2>
             </div>
             
-         
-                
-            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                   @foreach ($categorys as $category)
+                @foreach ($categorys as $category)
                 <a href="#" class="border-4 border-secondary p-8 text-center hover:bg-accent hover:border-accent transition-all group">
                     <div class="text-6xl mb-4">{{ $category->icon }}</div>
                     <div class="font-display text-xl uppercase tracking-tight group-hover:text-secondary">{{ $category->name }}</div>
                     <div class="text-sm mt-2 opacity-70 group-hover:opacity-100">{{ $category->product_count }} Styles</div>
                 </a>
-                 @endforeach
+                @endforeach
             </div>
-            
-
         </div>
     </section>
 
-    <!-- Trending Products (Small Grid) -->
+    <!-- Trending Products -->
     <section class="py-20 px-6 bg-secondary">
         <div class="max-w-7xl mx-auto">
             <div class="flex items-baseline justify-between mb-12 pb-4 border-b-4 border-primary">
@@ -429,27 +584,42 @@
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-                @foreach ($trendings as $trending )
-                    
-                <!-- Trending Product 1 -->
+                @foreach ($trendings as $trending)
                 <div class="product-card bg-secondary border-4 border-primary">
                     <div class="aspect-square bg-border overflow-hidden">
-                        <img src="data:image/svg+xml,%3Csvg width='300' height='300' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='300' height='300' fill='%230a0a0a'/%3E%3Crect x='100' y='80' width='100' height='140' fill='%230066ff' opacity='0.6'/%3E%3Ctext x='150' y='260' font-size='12' fill='%23f5f5f0' text-anchor='middle'%3EZIP HOODIE%3C/text%3E%3C/svg%3E" alt="Trending" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                        @if($trending->productImages->first())
+                            <img src="{{ Storage::url($trending->productImages->first()->image_path) }}" alt="{{ $trending->name }}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                        @else
+                            <div class="w-full h-full flex items-center justify-center text-gray-400">No Image</div>
+                        @endif
                     </div>
                     <div class="p-4">
-                        <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">{{ $trending->badge }}</div>
+                        @if($trending->badge)
+                            <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">{{ $trending->badge }}</div>
+                        @endif
                         <h3 class="font-display text-base uppercase tracking-tight mb-2">{{ $trending->name }}</h3>
-                        <div class="font-bold text-lg">Rp {{ number_format($trending->price, 0, ',', '.') }}</div>
-                        <div class="flex gap-1 mt-2">
-                            <span class="text-accent">★★★★★</span>
-                            <span class="text-xs opacity-60">(324)</span>
-                        </div>
+                        <div class="font-bold text-lg mb-2">Rp {{ number_format($trending->final_price, 0, ',', '.') }}</div>
+                         <a href="{{ route('product.show', $trending->slug) }}" 
+                       class="bg-white text-primary border-2 border-primary px-3 py-2 text-xs uppercase tracking-wider hover:bg-gray-100 transition-all text-center">
+                        View
+                    </a>
+                        @auth
+                            <form action="{{ route('cart.add') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="product_id" value="{{ $trending->id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="w-full bg-primary text-secondary border-2 border-primary px-4 py-2 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all">
+                                    Add to Cart
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('login') }}" class="block w-full text-center bg-primary text-secondary border-2 border-primary px-4 py-2 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all">
+                                Login to Buy
+                            </a>
+                        @endauth
                     </div>
-                     
                 </div>
-                 @endforeach
-
-           
+                @endforeach
             </div>
         </div>
     </section>
@@ -633,35 +803,12 @@
             });
         });
 
-        // Add to cart animation
-        document.querySelectorAll('.product-card button').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Add animation
-                const originalText = this.textContent;
-                this.textContent = '✓ Added!';
-                this.classList.add('bg-green-600');
-                
-                setTimeout(() => {
-                    this.textContent = originalText;
-                    this.classList.remove('bg-green-600');
-                }, 2000);
-                
-                // Here you would normally send AJAX request to add to cart
-                // Example: fetch('/cart/add', { method: 'POST', body: ... })
-            });
-        });
-
         // Newsletter form submission
         const newsletterForms = document.querySelectorAll('form');
         newsletterForms.forEach(form => {
             if (form.querySelector('input[type="email"]')) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
-                    // Here you would normally send AJAX request
-                    // For now, just show success message
                     alert('Thank you for subscribing!');
                     this.reset();
                 });

@@ -5,23 +5,23 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 class Admin
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-
-        if(!auth()->check()) {
+        // Use Auth::check() or auth()->check() to verify if a user is logged in
+        if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        if(auth()->user()->role != 'admin') {
-            abort(403);
+        // Now that we know a user exists, check the role
+        if (Auth::user()->role !== 'admin') {
+            abort(403, 'Unauthorized action.');
         }
 
         return $next($request);

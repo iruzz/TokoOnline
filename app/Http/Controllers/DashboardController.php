@@ -28,5 +28,21 @@ class DashboardController extends Controller
      return view('welcome', compact('categorys', 'items', 'featureds', 'newArrivals', 'trendings'));
    }
 
+    public function showProduct($slug)
+    {
+        $product = Product::where('slug', $slug)
+            ->with(['category', 'productImages'])
+            ->firstOrFail();
+        
+        // Related products (same category)
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('status', 'active')
+            ->with('productImages')
+            ->limit(4)
+            ->get();
+        
+        return view('product.show', compact('product', 'relatedProducts'));
+    }
 
 }
