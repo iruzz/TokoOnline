@@ -13,11 +13,11 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name', 'slug', 'description', 'category_id', 'featured_group_id',
-        'price', 'discount_price', 'stock', 'sku', 'size', 'color',
-        'is_trending', 'badge', 'status',
-    ];
+   protected $fillable = [
+    'name', 'slug', 'description', 'category_id', 'featured_group_id',
+    'price', 'discount_price', 'stock', 'sku', 'size', 'color',
+    'is_trending', 'is_new', 'badge', 'status',  // ← TAMBAHKAN is_new
+];
 
     protected $casts = [
         'price' => 'decimal:2',

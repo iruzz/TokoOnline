@@ -374,17 +374,14 @@
                 <a href="#" class="text-sm uppercase tracking-wider border-b-2 border-accent hover:text-accent transition-colors">View All →</a>
             </div>
             
-        <!-- SECTION: New Arrivals - FIXED UI -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+           <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
     @foreach ($newArrivals as $newArrival)
-    <div class="product-card bg-secondary border-4 border-primary relative">
+    <div class="product-card bg-secondary border-4 border-primary relative badge-corner">
         @if($newArrival->badge)
-            <div class="absolute top-3 left-3 bg-accent text-secondary text-xs font-bold px-3 py-1 uppercase tracking-wider z-10">
-                {{ $newArrival->badge }}
-            </div>
+            <div class="absolute top-3 left-3 bg-accent text-secondary text-xs font-bold px-3 py-1 uppercase tracking-wider z-10">{{ $newArrival->badge }}</div>
         @endif
         
-        <!-- Product Image -->
+        <!-- Product Image - Clickable -->
         <a href="{{ route('product.show', $newArrival->slug) }}">
             <div class="aspect-square bg-border overflow-hidden">
                 @if($newArrival->productImages->first())
@@ -397,50 +394,48 @@
             </div>
         </a>
         
-        <!-- Product Info - FIXED STRUCTURE -->
-        <div class="p-4 flex flex-col">
-            <!-- Category -->
-            <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">
-                {{ $newArrival->category->name }}
-            </div>
+        <div class="p-4">
+            <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">{{ $newArrival->category->name }}</div>
             
-            <!-- Product Name - Fixed Height -->
+            <!-- Product Name - Clickable -->
             <a href="{{ route('product.show', $newArrival->slug) }}">
-                <h3 class="font-display text-lg uppercase tracking-tight mb-2 hover:text-accent transition-colors line-clamp-2 h-14">
+                <h3 class="font-display text-lg uppercase tracking-tight mb-2 hover:text-accent transition-colors">
                     {{ $newArrival->name }}
                 </h3>
             </a>
             
-            <!-- Price -->
-            <div class="font-bold text-xl text-blue-600 mb-3">
-                Rp {{ number_format($newArrival->final_price, 0, ',', '.') }}
-            </div>
-            
-            <!-- Buttons Grid - Always at same position with mt-auto -->
-            <div class="grid grid-cols-2 gap-2 mt-auto">
-                <!-- View Button -->
-                <a href="{{ route('product.show', $newArrival->slug) }}" 
-                   class="bg-white text-primary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-gray-100 transition-all text-center font-semibold">
-                    View
-                </a>
+            <!-- Price & Buttons -->
+            <div class="space-y-3">
+                <div class="font-bold text-xl text-blue-600">
+                    Rp {{ number_format($newArrival->final_price, 0, ',', '.') }}
+                </div>
                 
-                <!-- Add to Cart Button -->
-                @auth
-                    <form action="{{ route('cart.add') }}" method="POST" class="w-full">
-                        @csrf
-                        <input type="hidden" name="product_id" value="{{ $newArrival->id }}">
-                        <input type="hidden" name="quantity" value="1">
-                        <button type="submit" 
-                                class="w-full bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all font-semibold">
-                            Add
-                        </button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" 
-                       class="bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all text-center inline-block font-semibold">
-                        Login
+                <!-- Buttons Grid -->
+                <div class="grid grid-cols-2 gap-2">
+                    <!-- View Details Button -->
+                    <a href="{{ route('product.show', $newArrival->slug) }}" 
+                       class="bg-white text-primary border-2 border-primary px-3 py-2 text-xs uppercase tracking-wider hover:bg-gray-100 transition-all text-center">
+                        View
                     </a>
-                @endauth
+                    
+                    <!-- Add to Cart Button -->
+                    @auth
+                        <form action="{{ route('cart.add') }}" method="POST" class="inline-block">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $newArrival->id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" 
+                                    class="w-full bg-primary text-secondary border-2 border-primary px-3 py-2 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all">
+                                Add
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" 
+                           class="bg-primary text-secondary border-2 border-primary px-3 py-2 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all text-center inline-block">
+                            Login
+                        </a>
+                    @endauth
+                </div>
             </div>
         </div>
     </div>
@@ -448,20 +443,11 @@
 </div>
 
 
--->
-</div>
-
-<!-- SECTION: Trending Products - FIXED UI -->
+<!-- ========== TRENDING PRODUCTS SECTION ========== -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
     @foreach ($trendings as $trending)
-    <div class="product-card bg-secondary border-4 border-primary relative">
-        @if($trending->badge)
-            <div class="absolute top-3 left-3 bg-accent text-secondary text-xs font-bold px-3 py-1 uppercase tracking-wider z-10">
-                {{ $trending->badge }}
-            </div>
-        @endif
-        
-        <!-- Product Image -->
+    <div class="product-card bg-secondary border-4 border-primary">
+        <!-- Product Image - Clickable -->
         <a href="{{ route('product.show', $trending->slug) }}">
             <div class="aspect-square bg-border overflow-hidden">
                 @if($trending->productImages->first())
@@ -474,49 +460,44 @@
             </div>
         </a>
         
-        <!-- Product Info - FIXED STRUCTURE -->
-        <div class="p-4 flex flex-col">
-            <!-- Category (only show if has badge) -->
+        <div class="p-4">
             @if($trending->badge)
-                <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">
-                    {{ $trending->category->name }}
-                </div>
+                <div class="text-xs text-accent uppercase tracking-wider font-semibold mb-1">{{ $trending->badge }}</div>
             @endif
             
-            <!-- Product Name - Fixed Height -->
+            <!-- Product Name - Clickable -->
             <a href="{{ route('product.show', $trending->slug) }}">
-                <h3 class="font-display text-lg uppercase tracking-tight mb-2 hover:text-accent transition-colors line-clamp-2 h-14">
+                <h3 class="font-display text-base uppercase tracking-tight mb-2 hover:text-accent transition-colors">
                     {{ $trending->name }}
                 </h3>
             </a>
             
-            <!-- Price -->
-            <div class="font-bold text-xl text-blue-600 mb-3">
+            <div class="font-bold text-lg mb-3 text-blue-600">
                 Rp {{ number_format($trending->final_price, 0, ',', '.') }}
             </div>
             
-            <!-- Buttons Grid - Always at same position with mt-auto -->
-            <div class="grid grid-cols-2 gap-2 mt-auto">
-                <!-- View Button -->
+            <!-- Buttons Grid -->
+            <div class="grid grid-cols-2 gap-2">
+                <!-- View Details Button -->
                 <a href="{{ route('product.show', $trending->slug) }}" 
-                   class="bg-white text-primary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-gray-100 transition-all text-center font-semibold">
+                   class="bg-white text-primary border-2 border-primary px-3 py-2 text-xs uppercase tracking-wider hover:bg-gray-100 transition-all text-center">
                     View
                 </a>
                 
                 <!-- Add to Cart Button -->
                 @auth
-                    <form action="{{ route('cart.add') }}" method="POST" class="w-full">
+                    <form action="{{ route('cart.add') }}" method="POST">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $trending->id }}">
                         <input type="hidden" name="quantity" value="1">
                         <button type="submit" 
-                                class="w-full bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all font-semibold">
+                                class="w-full bg-primary text-secondary border-2 border-primary px-3 py-2 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all">
                             Add
                         </button>
                     </form>
                 @else
                     <a href="{{ route('login') }}" 
-                       class="bg-primary text-secondary border-2 border-primary px-3 py-2.5 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all text-center inline-block font-semibold">
+                       class="bg-primary text-secondary border-2 border-primary px-3 py-2 text-xs uppercase tracking-wider hover:bg-accent hover:border-accent transition-all text-center inline-block">
                         Login
                     </a>
                 @endauth
